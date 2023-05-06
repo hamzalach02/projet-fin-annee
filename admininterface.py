@@ -98,6 +98,9 @@ class ProductWindow:
             rembuttons=tk.Button(self.inner_frame, width=10, text="remove",anchor="w",bg="red", command=lambda id=product[0]: self.remove_product(id))
 
             rembuttons.grid(row=row, column=col+8, padx=10, pady=5)
+            editbutton=tk.Button(self.inner_frame, width=10, text="edit",anchor="w",bg="skyblue", command=lambda id=product[0]: self.modifier_p(id))
+
+            editbutton.grid(row=row, column=col+9, padx=10, pady=5)
             
             
             
@@ -110,8 +113,8 @@ class ProductWindow:
             image_label.image = photo
             image_label.grid(row=row, column=col+7, padx=10, pady=5)
            
-            col += 9
-            if col > 8:
+            col += 10
+            if col > 9:
                 col = 0
                 row += 1
 
@@ -201,6 +204,9 @@ class ProductWindow:
          self.cnx = mysql.connector.connect(user='root', password='', host='localhost', database='gestion_stock')
          self.cursor = self.cnx.cursor()
 
+
+         
+
     def select_file(self):
                 self.file_path = filedialog.askopenfilename()
                 if self.file_path:
@@ -220,29 +226,78 @@ class ProductWindow:
                     print("Product added to database")
                 except mysql.connector.Error as error:
                     print("Failed to add product to database: {}".format(error))
+
+
+    def modifier_p(self,product_id):
+         
+         self.frame.destroy()
+         self.p_id=product_id
+         
+         self.frame3= tk.Frame(self.master,bg="#369E98")
+         self.frame3.pack(fill="both", expand=True)
+            
+         self.name_label = tk.Label(self.frame3, text="Product Name:")
+         self.name_label.pack(side="top", padx=10, pady=10)
+         self.name_entry = tk.Entry(self.frame3)
+         self.name_entry.pack(side="top", padx=10, pady=10)
+
+         self.desc_label = tk.Label(self.frame3, text="Product Description:")
+         self.desc_label.pack(side="top", padx=10, pady=10)
+         self.desc_entry = tk.Entry(self.frame3)
+         self.desc_entry.pack(side="top", padx=10, pady=10)
+
+         self.price_label = tk.Label(self.frame3, text="Product Price:")
+         self.price_label.pack(side="top", padx=10, pady=10)
+         self.price_entry = tk.Entry(self.frame3)
+         self.price_entry.pack(side="top", padx=10, pady=10)
+
+         self.qty_label = tk.Label(self.frame3, text="Product Quantity:")
+         self.qty_label.pack(side="top", padx=10, pady=10)
+         self.qty_entry = tk.Entry(self.frame3)
+         self.qty_entry.pack(side="top", padx=10, pady=10)
+
+         self.add_edit= tk.Button(self.frame3, text="edit product",command=self.edit)
+         self.add_edit.pack(side="top", padx=10, pady=10)
+         self.add_button_back= tk.Button(self.frame3, text="back to products",command=self.back)
+         self.add_button_back.pack(side="top", padx=10, pady=10)
+
+    def edit(self):
+         cnx = mysql.connector.connect(
+                     host="localhost",
+                     user="root",
+                     password="",
+                     database="gestion_stock"
+                     )
+         cursor = cnx.cursor()
+         query = "UPDATE produit SET nom_p = %s, prix_u = %s,desc_p= %s ,Q_stock = %s WHERE id_p = %s"
+         values = (self.name_entry.get(), self.price_entry.get(),self.desc_entry.get() ,self.qty_entry.get(),self.p_id)
+         cursor.execute(query, values)
+         cnx.commit()
+         cursor.close()
+         cnx.close()
+
+        # Update the list of products and redisplay them
+         self.master.destroy()    
+         subprocess.call(["python", "admininterface.py"])
+
+         
+
+        
+         
+
+         
+
+         
+
+         
+
+
+
     def back(self):
          self.master.destroy()    
          subprocess.call(["python", "admininterface.py"])
 
-    # def delete_product(self,product_id):
-    #     # Connect to the MySQL database
-    #     cnx = mysql.connector.connect(
-    #         host="localhost",
-    #         user="root",
-    #         password="",
-    #         database="gestion_stock"
-    #     )
-    #     cursor = cnx.cursor()
-
-    #     # Delete the product with the given ID
-    #     delete_query = "DELETE FROM produit WHERE id_p = %s"
-    #     cursor.execute(delete_query, (product_id,))
-    #     cnx.commit()
-
-    #     # Close the cursor and database connection
-    #     cursor.close()
-    #     cnx.close()
-            
+    
         
  
 
@@ -251,6 +306,6 @@ class ProductWindow:
 
 if __name__ == "__main__":
     root = tk.Tk()
-    root.geometry("1200x600")
+    root.geometry("1300x600")
     app = ProductWindow(root)
     root.mainloop()
